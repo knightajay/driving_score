@@ -2,14 +2,17 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from scoring_logic import process_and_score
 import shutil
 import os
+import uuid # Added to generate unique filenames
 
 app = FastAPI()
 
+# ⚠️ NOTICE: 'async' is removed from the line below! ⚠️
 @app.post("/analyze")
-async def analyze_trip(sensor_csv: UploadFile = File(...), driving_csv: UploadFile = File(...)):
-    # Save uploaded files temporarily
-    sensor_path = "temp_sensor.csv"
-    driving_path = "temp_driving.csv"
+def analyze_trip(sensor_csv: UploadFile = File(...), driving_csv: UploadFile = File(...)):
+    # Generate unique filenames so simultaneous requests don't break
+    unique_id = str(uuid.uuid4())
+    sensor_path = f"temp_sensor_{unique_id}.csv"
+    driving_path = f"temp_driving_{unique_id}.csv"
 
     try:
         with open(sensor_path, "wb") as buffer:
